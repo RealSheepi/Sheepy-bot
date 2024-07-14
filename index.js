@@ -46,4 +46,42 @@ client.on("interactionCreate", async (interaction) => {
     }
 });
 
+client.on('guildMemberAdd', async member => {
+    try {
+        const fetchedLogs = await member.guild.fetchAuditLogs({
+            limit: 1,
+            type: AuditLogEvent.InviteCreate
+        });
+        const inviteLog = fetchedLogs.entries.first();
+
+        let inviter = 'Unknown';
+
+        if (inviteLog) {
+            const { executor, target } = inviteLog;
+
+            if (target.id === member.id) {
+                inviter = executor.tag;
+            }
+        }
+
+        const welcomeChannelId = 'your-channel-id'; 
+        const welcomeChannel = member.guild.channels.cache.get(welcomeChannelId);
+
+        if (!welcomeChannel) return;
+
+        const welcomeEmbed = new EmbedBuilder()
+            .setColor('#00ff00')
+            .setTitle('Welcome!')
+            .setDescription(`Welcome to the server, ${member.user.tag}!\nYou were invited by ${inviter}.`)
+            .setImage('welcome-gif') 
+            .setTimestamp();
+
+        await welcomeChannel.send({ embeds: [welcomeEmbed] });
+
+    } catch (error) {
+        console.error('Error fetching audit logs:', error);
+    }
+});
+
+
 client.login(token);
