@@ -1,0 +1,25 @@
+const { SlashCommandBuilder } = require('discord.js');
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('back')
+        .setDescription('Remove the AFK role and set yourself as back'),
+    async execute(interaction) {
+        const afkRoleId = '1261916661712294008';
+        const member = interaction.member;
+
+        const afkRole = interaction.guild.roles.cache.get(afkRoleId);
+
+        if (!afkRole) {
+            return interaction.reply({ content: 'AFK role not found.', ephemeral: true });
+        }
+
+        try {
+            await member.roles.remove(afkRole);
+            await interaction.reply({ content: 'You are no longer AFK.', ephemeral: true });
+        } catch (error) {
+            console.error('Error removing AFK role:', error);
+            await interaction.reply({ content: 'There was an error removing your AFK status.', ephemeral: true });
+        }
+    },
+};
